@@ -1,6 +1,71 @@
-[![Build Status](https://travis-ci.org/petergtz/pegomock.svg?branch=master)](https://travis-ci.org/petergtz/pegomock)
-
 PegoMock is a mocking framework for the [Go programming language](http://golang.org/). It integrates well with Go's built-in `testing` package, but can be used in other contexts too. It is based on [golang/mock](https://github.com/golang/mock), but uses a DSL closely related to [Mockito](http://site.mockito.org/mockito/docs/current/org/mockito/Mockito.html).
+
+Joom-specific
+===
+This is a fork of [PegoMock framework](https://github.com/petergtz/pegomock). The reasoning behind the choice of pegomock as our _Go_-to mocking framework can be found [here](https://www.notion.so/joomteam/Go-Mock-reference-01eb736c0e98489c8429d11f2a87dd58#a51414c3a20d4fd1a80426f766f133cd).
+
+### Using pegomock, short version
+1) [install](#getting-pegomock) pegomock
+2) generate mocks:
+* add a comment starting with `//go:generate pegomock generate $GOFILE` to the file containing the interfaces to mock ([example](https://github.com/joomcode/api/blob/ac3b048318cf2f0705ef3e3131c8b212738d5e4d/src/joom/app/report/visamarketplaceprogram/manager.go#L3))
+* to use type-aware matching for mocked method arguments, generate matcher functions by adding `-m` parameter to pegomock call. The helper functions will be created in a separate package (`mock/matchers`).
+* if you'd like to see the generated code, either call the generator manually (`pegomock generate...`) or use `gauguin.sh` script to regenerate all files in the API repository.
+3) use mocks in your test:
+```go
+package test
+
+func TestWithMock(t *testing.T) {
+  // mock initialization, uses WithT to handle test errors
+  myMock := mock.NewMock(pegomock.WithT(t))
+
+  // now, set up the responses that mock's methods should return, based on the arguments passed
+  // simplest case, exact equality: mock.DoSomething(expectedArg1, expectedArg2) will return (1, "abc", nil) from now on
+  pegomock.When(myMock.DoSomething(expectedArg1, expectedArg2)).ThenReturn(1, "abc", nil)
+  // a conditional response, using matchers: when second param !=1 -> return (0, "", errorx.New("uh-oh") 
+  pegomock.When(myMock.DoSomething(pegomock.AnyString(), pegomock.NotEqUint64(1))).ThenReturn(0, "", errorx.New("uh-oh"))
+
+  // here goes the test itself...
+
+  // verify that the interaction with the mocked object went as expected
+  mock.VerifyWasCalled(pegomock.Times(2)).DoSomething(pegomock.AnyString(), pegomock.AnyUint64())
+}
+```
+
+### Known issues
+
+#### Locally defined types
+
+If the interface uses locally defined types, its mock has to be generated in the same package as the original interface. To generate such a mock, you need to include `--package=<original_package>` in the pegomock call. (This limitation is on our list of things to fix.)
+
+Otherwise, please use the recommended way to create mocks:
+
+`--output=<package_name>_mock/<source_filename>_gen.go --package=<package_name>_mock`
+
+This creates them in a separate package names `<package_name>_mock` 
+
+#### Duplicate matchers generated with Bazel
+ 
+When running new mock-using tests via Bazel, you may encounter an error that looks like this:
+```
+bazel-out/.../paycore_impl_mocks/matchers_refund_account_dao_mock.go/context_context.go:11:6: AnyContextContext redeclared in this block
+	bazel-out/.../matchers_cancel_account_dao_mock.go/context_context.go:11:26: previous declaration
+```
+
+When pegomock generates several mocks and their matchers for a single mock package, the calls to generator are being made in parallel, so any generator instance isn't aware of its neighbouring generators.
+
+Pegomock believes it should generate comparator functions for every single type it encountered in the source file. When there's an intersection between the used types in different mocks (e.g., `context.Context` is used in almost any interface), collisions arise due to the same comparators being generated twice or more and put into the same package (`mock_matchers`).
+
+The currently used workaround is to explicitly specify which types should not have their matchers generated in a pegomock call (there's a flag `skip-matchers`, which allows to do exactly that).
+
+To fix the case above, add `--skip-matchers=context_context` to one of the pegomock calls so that `context.Context` matchers are generated only once.
+
+### Differences from the master branch:
+* `--skip-changes` flag allows to avoid generating duplicate matchers inside mock package 
+
+---
+#### The original documentation goes below.
+
+[![Build Status](https://travis-ci.org/petergtz/pegomock.svg?branch=master)](https://travis-ci.org/petergtz/pegomock)
 
 Getting Pegomock
 ================
