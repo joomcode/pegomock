@@ -18,8 +18,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/joomcode/pegomock/pegomock/filehandling"
 	. "github.com/onsi/ginkgo"
-	"github.com/petergtz/pegomock/pegomock/filehandling"
 )
 
 func TestMockGeneration(t *testing.T) { RunSpecs(t, "Generating mocks with GoMock-source") }

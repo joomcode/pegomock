@@ -24,7 +24,7 @@ import (
 
 	"gopkg.in/alecthomas/kingpin.v2"
 
-	"github.com/petergtz/pegomock/pegomock/filehandling"
+	"github.com/joomcode/pegomock/pegomock/filehandling"
 	"github.com/petergtz/pegomock/pegomock/util"
 )
 
