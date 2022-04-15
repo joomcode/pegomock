@@ -5,7 +5,10 @@ Joom-specific
 This is a fork of [PegoMock framework](https://github.com/petergtz/pegomock). The reasoning behind the choice of pegomock as our _Go_-to mocking framework can be found [here](https://www.notion.so/joomteam/Go-Mock-reference-01eb736c0e98489c8429d11f2a87dd58#a51414c3a20d4fd1a80426f766f133cd).
 
 ### Using pegomock, short version
-1) [install](#getting-pegomock) pegomock
+1) install pegomock:
+```bash
+cd <api_repo_directory>/src && go install github.com/petergtz/pegomock/pegomock
+```
 2) generate mocks:
 * add a comment starting with `//go:generate pegomock generate $GOFILE` to the file containing the interfaces to mock ([example](https://github.com/joomcode/api/blob/ac3b048318cf2f0705ef3e3131c8b212738d5e4d/src/joom/app/report/visamarketplaceprogram/manager.go#L3))
 * to use type-aware matching for mocked method arguments, generate matcher functions by adding `-m` parameter to pegomock call. The helper functions will be created in a separate package (`mock/matchers`).
@@ -41,7 +44,7 @@ Otherwise, please use the recommended way to create mocks:
 
 `--output=<package_name>_mock/<source_filename>_gen.go --package=<package_name>_mock`
 
-This creates them in a separate package names `<package_name>_mock` 
+This creates them in a separate package named `<package_name>_mock` 
 
 #### Duplicate matchers generated with Bazel
  
