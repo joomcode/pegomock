@@ -51,6 +51,8 @@ func Run(cliArgs []string, out io.Writer, in io.Reader, app *kingpin.Application
 		// TODO: self_package was taken as is from GoMock.
 		//       Still don't understand what it's really there for.
 		//       So for now it's not tested.
+		progOnly               = generateCmd.Flag("prog_only", "(reflect mode) Only generate the reflection program; write it to stdout and exit.").Bool()
+		execOnly               = generateCmd.Flag("exec_only", "(reflect mode) If set, execute this reflection program.").String()
 		selfPackage            = generateCmd.Flag("self_package", "If set, the package this mock will be part of.").String()
 		debugParser            = generateCmd.Flag("debug", "Print debug information.").Short('d').Bool()
 		shouldGenerateMatchers = generateCmd.Flag("generate-matchers", "Generate matchers for all non built-in types in a \"matchers\" "+
@@ -126,7 +128,9 @@ func Run(cliArgs []string, out io.Writer, in io.Reader, app *kingpin.Application
 			*useExperimentalModelGen,
 			*shouldGenerateMatchers,
 			*matchersDestination,
-			*skipMatchers)
+			*skipMatchers,
+			*execOnly,
+			*progOnly)
 
 	case watchCmd.FullCommand():
 		var targetPaths []string
@@ -147,4 +151,8 @@ func Run(cliArgs []string, out io.Writer, in io.Reader, app *kingpin.Application
 		}
 		remove.Remove(path, *removeRecursive, !*removeNonInteractive, *removeDryRun, *removeSilent, out, in, os.Remove)
 	}
+}
+
+func DeterminePackageNameIn(dir string) (string, error) {
+	return strings.Replace(filepath.Base(dir), "-", "_", -1) + "_test", nil
 }
