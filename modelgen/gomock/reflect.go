@@ -19,7 +19,6 @@ package gomock
 import (
 	"bytes"
 	"encoding/gob"
-	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -32,15 +31,9 @@ import (
 	"github.com/petergtz/pegomock/model"
 )
 
-var (
-	progOnly = flag.Bool("prog_only", false, "(reflect mode) Only generate the reflection program; write it to stdout.")
-	execOnly = flag.String("exec_only", "", "(reflect mode) If set, execute this reflection program.")
-)
-
-func Reflect(importPath string, symbols []string) (*model.Package, error) {
+func Reflect(importPath string, symbols []string, progPath string, progOnly bool) (*model.Package, error) {
 	// TODO: sanity check arguments
-	progPath := *execOnly
-	if *execOnly == "" {
+	if progPath == "" {
 		workingDir, err := os.Getwd()
 		if err != nil {
 			return nil, err
@@ -66,7 +59,7 @@ func Reflect(importPath string, symbols []string) (*model.Package, error) {
 		if err := reflectProgram.Execute(&program, &data); err != nil {
 			return nil, err
 		}
-		if *progOnly {
+		if progOnly {
 			io.Copy(os.Stdout, &program)
 			os.Exit(0)
 		}
