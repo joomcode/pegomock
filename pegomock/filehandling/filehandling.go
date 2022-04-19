@@ -66,7 +66,7 @@ func OutputFilePath(args []string, outputDirPath string, outputFilePathOverride 
 }
 
 func GenerateMockFile(args []string, outputFilePath string, nameOut string, packageOut string, selfPackage string, debugParser bool, out io.Writer, useExperimentalModelGen bool, shouldGenerateMatchers bool, matchersDestination string, skipMatchers string, execOnly string, progOnly bool) {
-	mockSourceCode, matcherSourceCodes := GenerateMockSourceCode(args, nameOut, packageOut, selfPackage, debugParser, out, useExperimentalModelGen, execOnly, progOnly)
+	mockSourceCode, matcherSourceCodes := GenerateMockSourceCode(args, nameOut, packageOut, selfPackage, debugParser, out, useExperimentalModelGen, execOnly, progOnly, outputFilePath)
 
 	err := ioutil.WriteFile(outputFilePath, mockSourceCode, 0664)
 	if err != nil {
@@ -105,7 +105,7 @@ func matchersFilter(skipMatchers string) map[string]struct{} {
 	return result
 }
 
-func GenerateMockSourceCode(args []string, nameOut string, packageOut string, selfPackage string, debugParser bool, out io.Writer, useExperimentalModelGen bool, execOnly string, progOnly bool) ([]byte, map[string]string) {
+func GenerateMockSourceCode(args []string, nameOut string, packageOut string, selfPackage string, debugParser bool, out io.Writer, useExperimentalModelGen bool, execOnly string, progOnly bool, outputPath string) ([]byte, map[string]string) {
 	var err error
 
 	var ast *model.Package
@@ -121,7 +121,7 @@ func GenerateMockSourceCode(args []string, nameOut string, packageOut string, se
 			ast, err = loader.GenerateModel(args[0], args[1])
 
 		} else {
-			ast, err = gomock.Reflect(args[0], strings.Split(args[1], ","), execOnly, progOnly)
+			ast, err = gomock.Reflect(args[0], strings.Split(args[1], ","), execOnly, progOnly, outputPath)
 		}
 		src = fmt.Sprintf("%v (interfaces: %v)", args[0], args[1])
 	}

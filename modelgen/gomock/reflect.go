@@ -31,7 +31,7 @@ import (
 	"github.com/petergtz/pegomock/model"
 )
 
-func Reflect(importPath string, symbols []string, progPath string, progOnly bool) (*model.Package, error) {
+func Reflect(importPath string, symbols []string, progPath string, progOnly bool, outPath string) (*model.Package, error) {
 	// TODO: sanity check arguments
 	if progPath == "" {
 		workingDir, err := os.Getwd()
@@ -60,6 +60,11 @@ func Reflect(importPath string, symbols []string, progPath string, progOnly bool
 			return nil, err
 		}
 		if progOnly {
+			if outPath != "" {
+				if err := os.WriteFile(outPath, program.Bytes(), 0664); err != nil {
+					return nil, err
+				}
+			}
 			io.Copy(os.Stdout, &program)
 			os.Exit(0)
 		}
