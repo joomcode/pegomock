@@ -64,8 +64,9 @@ func Reflect(importPath string, symbols []string, progPath string, progOnly bool
 				if err := os.WriteFile(outPath, program.Bytes(), 0664); err != nil {
 					return nil, err
 				}
+			} else {
+				io.Copy(os.Stdout, &program)
 			}
-			io.Copy(os.Stdout, &program)
 			os.Exit(0)
 		}
 		if err := ioutil.WriteFile(filepath.Join(tmpDir, progSource), program.Bytes(), 0600); err != nil {
