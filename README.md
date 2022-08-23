@@ -12,7 +12,7 @@ cd <api_repo_directory>/src && go install github.com/petergtz/pegomock/pegomock
 2) generate mocks:
 * add a comment starting with `//go:generate pegomock generate $GOFILE` to the file containing the interfaces to mock ([example](https://github.com/joomcode/api/blob/ac3b048318cf2f0705ef3e3131c8b212738d5e4d/src/joom/app/report/visamarketplaceprogram/manager.go#L3))
 * to use type-aware matching for mocked method arguments, generate matcher functions by adding `-m` parameter to pegomock call. The helper functions will be created in a separate package (`mock/matchers`).
-* if you'd like to see the generated code, either call the generator manually (`pegomock generate...`) or use `gauguin.sh` script to regenerate all files in the API repository.
+* if you'd like to see the generated code, either call the generator manually (`pegomock generate...`) or use `generate.sh` script to regenerate all files in the API repository.
 3) use mocks in your test:
 ```go
 package test
